@@ -24,14 +24,15 @@ function clearDisplay() {
 function tryFetch(value) {
   fetchCountry(value)
     .then(response => {
-      if (response.status === 404) {
-        Notify.failure('Oops, there is no country with that name');
-        clearDisplay();
-        throw error;
-      }
       return response.json();
     })
     .then(countries => {
+      if (countries.status === 404) {
+        Notify.failure('Oops, there is no country with that name');
+        clearDisplay();
+        return;
+      }
+
       displaySearchResult(countries);
     })
     .catch(message => {
@@ -41,9 +42,11 @@ function tryFetch(value) {
 function displaySearchResult(resultArray) {
   if (resultArray.length > 10) {
     Notify.info('Too many matches found. Please enter a more specific name.');
+    clearDisplay();
     return;
   }
   if (resultArray.length === 1) {
+    console.log();
     refs.countryList.innerHTML = '';
     displayCountry(resultArray);
     return;
@@ -55,8 +58,8 @@ function displaySearchResult(resultArray) {
 function displayCountriesList(resultArray) {
   const countriesList = resultArray
     .map(country => {
-      return `<li><img src="${country.flags.svg}" alt="${country.name.common}" width="100px">
-        <p>${country.name.official}</p>
+      return `<li><img src="${country.flags.svg}" alt="${country.name}" width="100px">
+        <p>${country.name}</p>
       </li>`;
     })
     .join('');
@@ -64,7 +67,7 @@ function displayCountriesList(resultArray) {
 }
 
 function displayCountry(country) {
-  const countryItem = ` <h1><img src="${country[0].flags.svg}"  alt="${country[0].name.common}" width="100px" >${country[0].name.official}</h1><p>Capital:${country[0].capital[0]}</p><p>Population:${country[0].population}</p><p>Language:${country[0].name.language}</p>`;
+  const countryItem = ` <h1><img src="${country[0].flags.svg}"  alt="${country[0].name}" width="100px" >${country[0].name}</h1><p>Capital:${country[0].capital}</p><p>Population:${country[0].population}</p><p>Language:${country[0].languages[0].name}</p>`;
   refs.countryInfo.innerHTML = countryItem;
 }
 
